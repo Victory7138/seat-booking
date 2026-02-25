@@ -5,150 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Live Seat Booking</title>
 <style>
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f0f0f0;
-  text-align: center;
-  color: #333;
-}
-
-/* ---------- HEADER ---------- */
-header {
-  background: #1e88e5;
-  color: #fff;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-header h1 { margin:0; font-size:28px; }
-header p { margin:4px 0; font-size:13px; }
-
-/* ---------- THEATER ---------- */
-.theater {
-  display: flex;
-  justify-content: center;
-  gap: 40px; /* aisle between columns */
-  margin: 30px 10px;
-}
-
-/* Each column */
-.column {
-  display: grid;
-  grid-template-rows: repeat(20, 40px); /* 20 rows */
-  gap: 8px;
-}
-
-/* Each row has 7 seats horizontally */
-.row-seats {
-  display: grid;
-  grid-template-columns: repeat(7, 40px);
-  gap: 6px;
-  justify-content: center;
-}
-
-/* Seats */
-.seat {
-  width: 40px;
-  height: 40px;
-  background: #fff; /* empty */
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.seat:hover:not(.booked) {
-  transform: scale(1.1);
-  box-shadow: 0 0 6px rgba(0,0,0,0.3);
-}
-
-.seat.booked {
-  background: #4caf50; /* booked → green */
-  cursor: not-allowed;
-}
-
-/* ---------- MODAL ---------- */
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(3px);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 350px;
-  text-align: center;
-  color: #333;
-}
-
-.modal-content input {
-  width: 90%;
-  margin: 8px 0;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  outline: none;
-}
-
-.modal-content button {
-  padding: 10px 20px;
-  margin-top: 10px;
-  border:none;
-  border-radius: 5px;
-  background:#1e88e5;
-  color:#fff;
-  font-weight:bold;
-  cursor:pointer;
-}
-
+body { margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:#f0f0f0;text-align:center; }
+header { background:#1e88e5; color:white; padding:20px; box-shadow:0 4px 8px rgba(0,0,0,0.2); }
+header h1 {margin:0;font-size:28px;} header p {margin:4px 0;font-size:13px;}
+.theater { display:flex; justify-content:center; gap:40px; margin:30px 10px; }
+.column { display:grid; grid-template-rows:repeat(20, 40px); gap:8px; }
+.row-seats { display:grid; grid-template-columns:repeat(7,40px); gap:6px; justify-content:center; }
+.seat { width:40px;height:40px;border-radius:6px;border:1px solid #ccc; cursor:pointer; transition:0.2s; background:#fff; }
+.seat:hover:not(.booked){ transform:scale(1.1); box-shadow:0 0 6px rgba(0,0,0,0.3); }
+.seat.booked{ background:#4caf50; cursor:not-allowed; } .seat.selected{ background:orange; }
+.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(3px); justify-content:center; align-items:center; z-index:1000; }
+.modal-content { background:#fff; padding:20px; border-radius:10px; width:90%; max-width:350px; text-align:center; color:#333; }
+.modal-content input { width:90%; margin:8px 0; padding:10px; border-radius:5px; border:1px solid #ccc; outline:none; }
+.modal-content button { padding:10px 20px; margin-top:10px; border:none; border-radius:5px; background:#1e88e5; color:white; font-weight:bold; cursor:pointer; }
 .modal-content button:hover { background:#1565c0; }
-
-#modalMsg { font-weight:bold; margin-top:8px; }
-
-/* ---------- RESPONSIVE ---------- */
-@media(max-width:768px){
-  .theater { flex-direction: column; gap: 20px; }
-  .seat { width:32px; height:32px; }
-  .row-seats { gap:4px; }
-}
-
-@media(max-width:480px){
-  .seat { width:28px; height:28px; }
-  .row-seats { gap:3px; }
-  header h1 { font-size:22px; }
-  header p { font-size:12px; }
-}
+#modalMsg{ font-weight:bold; margin-top:8px; color:red; }
+#popup { position:fixed; top:20px; left:50%; transform:translateX(-50%); background:red; color:white; font-weight:bold; padding:10px 20px; border-radius:6px; z-index:2000; animation:blink 1s infinite; }
+@keyframes blink {0%,50%,100%{opacity:1;}25%,75%{opacity:0;} }
+@media(max-width:768px){ .theater{flex-direction:column;gap:20px;} .seat{width:32px;height:32px;} .row-seats{gap:4px;} }
+@media(max-width:480px){ .seat{width:28px;height:28px;} .row-seats{gap:3px;} header h1{font-size:22px;} header p{font-size:12px;} }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Music Concert</h1>
-  <p>Hosted by The Potter's House</p>
-  <p>Ideal Square Building, 3rd Floor Above Westside, Stadium Road, Gachibowli</p>
+<h1>Music Concert</h1>
+<p>Hosted by The Potter's House</p>
+<p>Ideal Square Building, 3rd Floor Above Westside, Stadium Road, Gachibowli</p>
 </header>
 
+<div id="popup">Limited Slots for Free Registration</div>
 <div class="theater" id="theater"></div>
 
-<!-- Modal -->
 <div class="modal" id="modal">
-  <div class="modal-content">
-    <h3>Book Seat: <span id="selectedSeatLabel"></span></h3>
-    <input type="text" id="name" placeholder="Your Name">
-    <input type="text" id="phone" placeholder="Phone Number">
-    <button id="bookBtn">Book Now</button>
-    <p id="modalMsg"></p>
-  </div>
+<div class="modal-content">
+<h3>Book Seat: <span id="selectedSeatLabel"></span></h3>
+<input type="text" id="name" placeholder="Your Name">
+<input type="text" id="phone" placeholder="Phone Number">
+<button id="bookBtn">Book Now</button>
+<p id="modalMsg"></p>
+</div>
 </div>
 
 <script>
@@ -157,28 +53,21 @@ const SECRET = "Gp@804246&Victory";
 
 const theaterDiv = document.getElementById("theater");
 let selectedSeat = null;
-const rows = 20;
-const columns = 3;
-const seatsPerRow = 7;
+const rows=20, columns=3, seatsPerRow=7;
 
-// Create columns with rows
 for(let c=0;c<columns;c++){
-  const colDiv = document.createElement("div");
-  colDiv.className = "column";
-
+  const colDiv=document.createElement("div"); colDiv.className="column";
   for(let r=1;r<=rows;r++){
-    const rowDiv = document.createElement("div");
-    rowDiv.className = "row-seats";
-
+    const rowDiv=document.createElement("div"); rowDiv.className="row-seats";
     for(let s=1;s<=seatsPerRow;s++){
-      const seat = document.createElement("div");
-      seat.className = "seat";
-      seat.dataset.id = `C${c+1}R${r}S${s}`;
+      const seat=document.createElement("div"); seat.className="seat";
+      seat.dataset.id=`C${c+1}R${r}S${s}`;
       seat.addEventListener("click",()=>{
         if(seat.classList.contains("booked")) return;
-        selectedSeat = seat.dataset.id;
-        document.getElementById("selectedSeatLabel").innerText = selectedSeat;
-        document.getElementById("modal").style.display = "flex";
+        document.querySelectorAll(".seat.selected").forEach(el=>el.classList.remove("selected"));
+        seat.classList.add("selected"); selectedSeat=seat.dataset.id;
+        document.getElementById("selectedSeatLabel").innerText=selectedSeat;
+        document.getElementById("modal").style.display="flex";
       });
       rowDiv.appendChild(seat);
     }
@@ -187,73 +76,48 @@ for(let c=0;c<columns;c++){
   theaterDiv.appendChild(colDiv);
 }
 
-// Load booked seats
 async function loadBookedSeats(){
   try{
-    const res = await fetch(API_URL);
-    const data = await res.json();
+    const res=await fetch(API_URL);
+    const data=await res.json();
     document.querySelectorAll(".seat").forEach(s=>s.classList.remove("booked"));
-    data.booked.forEach(seatId=>{
-      const seat = document.querySelector(`[data-id="${seatId}"]`);
+    data.booked.forEach(id=>{
+      const seat=document.querySelector(`[data-id="${id}"]`);
       if(seat) seat.classList.add("booked");
     });
   }catch(err){ console.error(err); }
 }
 
-// Book seat
-document.getElementById("bookBtn").addEventListener("click",async()=>{
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const modalMsg = document.getElementById("modalMsg");
-
-  if(!name || !phone){
-    modalMsg.innerText="Enter name & phone.";
-    return;
-  }
-  if(!/^[0-9]{10}$/.test(phone)){
-    modalMsg.innerText="Enter valid 10-digit phone.";
-    return;
-  }
-
+document.getElementById("bookBtn").addEventListener("click", async()=>{
+  const name=document.getElementById("name").value.trim();
+  const phone=document.getElementById("phone").value.trim();
+  const modalMsg=document.getElementById("modalMsg");
+  if(!name || !phone){ modalMsg.innerText="Enter name & phone."; return; }
+  if(!/^[0-9]{10}$/.test(phone)){ modalMsg.innerText="Enter valid 10-digit phone."; return; }
   try{
-    const res = await fetch(API_URL,{
-      method:"POST",
-      body: JSON.stringify({secret:SECRET, seat:selectedSeat, name, phone})
-    });
-    const result = await res.json();
-
-    if(result.status==="success"){
-      modalMsg.style.color="green";
-      modalMsg.innerText="Booking successful!";
-      loadBookedSeats();
-      setTimeout(closeModal,1200);
-    } else if(result.status==="taken"){
-      modalMsg.innerText="Seat already booked!";
-      loadBookedSeats();
-    } else {
-      modalMsg.innerText="Error!";
-    }
-  }catch(err){
-    modalMsg.innerText="Network error!";
-  }
+    const res=await fetch(API_URL,{ method:"POST", body:JSON.stringify({secret:SECRET, seat:selectedSeat, name, phone}) });
+    const result=await res.json();
+    if(result.status==="success"){ modalMsg.style.color="green"; modalMsg.innerText="Booking successful!"; loadBookedSeats(); setTimeout(closeModal,1200); }
+    else if(result.status==="taken"){ modalMsg.innerText="Seat already booked!"; loadBookedSeats(); }
+    else if(result.status==="invalid"){ modalMsg.innerText="Missing data. Enter name & phone."; }
+    else if(result.status==="unauthorized"){ modalMsg.innerText="Secret key invalid!"; }
+    else{ modalMsg.innerText="Unknown error!"; }
+  }catch(err){ modalMsg.innerText="Network error!"; }
 });
 
 function closeModal(){
   document.getElementById("modal").style.display="none";
+  document.getElementById("modalMsg").innerText="";
   document.getElementById("name").value="";
   document.getElementById("phone").value="";
-  document.getElementById("modalMsg").innerText="";
   selectedSeat=null;
 }
 
-window.onclick = function(e){
-  if(e.target === document.getElementById("modal")){
-    closeModal();
-  }
-}
+window.onclick = e=>{ if(e.target===document.getElementById("modal")) closeModal(); }
 
 loadBookedSeats();
 setInterval(loadBookedSeats,10000);
+setTimeout(()=>document.getElementById("popup").style.display="none",5000);
 </script>
 
 </body>
