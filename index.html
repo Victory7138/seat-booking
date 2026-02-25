@@ -108,35 +108,29 @@ async function loadBookedSeats(){
 }
 
 // Book seat
-document.getElementById("bookBtn").addEventListener("click", async () => {
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const modalMsg = document.getElementById("modalMsg");
+document.getElementById("bookBtn").addEventListener("click", async()=>{
+  const name=document.getElementById("name").value.trim();
+  const phone=document.getElementById("phone").value.trim();
+  const modalMsg=document.getElementById("modalMsg");
+  if(!name || !phone){ modalMsg.innerText="Enter name & phone."; return; }
+  if(!/^[0-9]{10}$/.test(phone)){ modalMsg.innerText="Enter valid 10-digit phone."; return; }
 
-  if (!name || !phone) { modalMsg.innerText = "Enter name & phone."; return; }
-  if (!/^[0-9]{10}$/.test(phone)) { modalMsg.innerText = "Enter valid 10-digit phone."; return; }
-
-  try {
+  try{
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ secret: SECRET, seat: selectedSeat, name, phone })
     });
+
     const result = await res.json();
 
-    if (result.status === "success") { 
-      modalMsg.style.color = "green"; 
-      modalMsg.innerText = "Booking successful!"; 
-      loadBookedSeats(); 
-      setTimeout(closeModal, 1200);
-    }
-    else if (result.status === "taken") { modalMsg.innerText = "Seat already booked!"; loadBookedSeats(); }
-    else if (result.status === "invalid") { modalMsg.innerText = "Missing data. Enter name & phone."; }
-    else if (result.status === "unauthorized") { modalMsg.innerText = "Secret key invalid!"; }
-    else { modalMsg.innerText = "Unknown error!"; }
-  } catch (err) {
-    modalMsg.innerText = "Network error!";
-  }
+    if(result.status==="success"){ modalMsg.style.color="green"; modalMsg.innerText="Booking successful!"; loadBookedSeats(); setTimeout(closeModal,1200);}
+    else if(result.status==="taken"){ modalMsg.innerText="Seat already booked!"; loadBookedSeats();}
+    else if(result.status==="invalid"){ modalMsg.innerText="Missing data. Enter name & phone.";}
+    else if(result.status==="unauthorized"){ modalMsg.innerText="Secret key invalid!";}
+    else{ modalMsg.innerText="Unknown error!";}
+
+  }catch(err){ modalMsg.innerText="Network error!"; }
 });
 
 function closeModal(){
