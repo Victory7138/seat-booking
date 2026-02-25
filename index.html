@@ -5,33 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Potter's House - Live Concert Booking</title>
 <style>
-body { margin:0; padding:0; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:#f0f0f0; text-align:center; }
-header { background:#1e88e5; color:white; padding:25px 10px; box-shadow:0 4px 8px rgba(0,0,0,0.2);}
-header h1 { margin:0; font-size:28px;}
-header h2 { margin:5px 0; font-size:20px; font-weight:normal;}
-header p { margin:3px 0; font-size:14px;}
-#popup { position:fixed; top:20px; left:50%; transform:translateX(-50%); background:red; color:white; font-weight:bold; padding:10px 20px; border-radius:6px; z-index:2000; animation:blink 1s infinite;}
+body { margin:0; padding:0; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:#f0f3f7; text-align:center; }
+header { background:#4a90e2; color:white; padding:30px 10px; box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+header h1 { font-size:36px; margin:0; font-weight:bold; }
+header h2 { font-size:24px; margin:8px 0; font-weight:bold; }
+header p { font-size:14px; margin:4px 0; }
+
+#popup { position:fixed; top:20px; left:50%; transform:translateX(-50%); background:red; color:white; font-weight:bold; padding:10px 20px; border-radius:6px; z-index:2000; animation:blink 1s infinite; }
 @keyframes blink {0%,50%,100%{opacity:1;}25%,75%{opacity:0;}}
-.legend { display:flex; justify-content:center; gap:20px; margin:20px 0; font-weight:bold;}
-.legend div { display:flex; align-items:center; gap:5px; font-size:14px;}
-.legend span { width:20px; height:20px; display:inline-block; border-radius:4px; border:1px solid #ccc;}
-.legend .available { background:#fff; } .legend .selected { background:orange; } .legend .booked { background:#4caf50; }
-.theater { display:flex; justify-content:center; gap:40px; margin:20px 10px;}
-.column { display:grid; grid-template-rows:repeat(20,40px); gap:8px; }
-.row-seats { display:grid; grid-template-columns:repeat(7,40px); gap:6px; justify-content:center;}
-.seat { width:40px; height:40px; border-radius:6px; border:1px solid #ccc; cursor:pointer; transition:0.2s; background:#fff;}
+
+.legend { display:flex; justify-content:center; gap:20px; margin:20px 0; font-weight:bold; }
+.legend div { display:flex; align-items:center; gap:5px; font-size:14px; }
+.legend span { width:20px; height:20px; display:inline-block; border-radius:4px; border:1px solid #ccc; }
+.legend .available { background:#fff; }
+.legend .selected { background:orange; }
+.legend .booked { background:#4caf50; }
+
+.theater { display:flex; justify-content:center; gap:40px; margin:20px 10px; }
+.column { display:grid; grid-template-rows:repeat(20,50px); gap:8px; }
+.row-seats { display:grid; grid-template-columns:repeat(7,50px); gap:6px; justify-content:center; }
+
+.seat { width:50px; height:50px; border-radius:6px; border:1px solid #ccc; cursor:pointer; transition:0.2s; background:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; }
 .seat:hover:not(.booked){ transform:scale(1.1); box-shadow:0 0 6px rgba(0,0,0,0.3);}
-.seat.booked{ background:#4caf50; cursor:not-allowed; }
-.seat.selected{ background:orange; }
+.seat.booked{ background:#4caf50; cursor:not-allowed; color:white;}
+.seat.selected{ background:orange; color:white; }
+
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(3px); justify-content:center; align-items:center; z-index:1000; }
 .modal-content { background:#fff; padding:20px; border-radius:10px; width:90%; max-width:350px; text-align:center; color:#333; }
 .modal-content input { width:90%; margin:8px 0; padding:10px; border-radius:5px; border:1px solid #ccc; outline:none; }
-.modal-content button { padding:10px 20px; margin-top:10px; border:none; border-radius:5px; background:#1e88e5; color:white; font-weight:bold; cursor:pointer; }
-.modal-content button:hover { background:#1565c0; }
+.modal-content button { padding:10px 20px; margin-top:10px; border:none; border-radius:5px; background:#4a90e2; color:white; font-weight:bold; cursor:pointer; }
+.modal-content button:hover { background:#357ab8; }
 #modalMsg{ font-weight:bold; margin-top:8px; color:red; }
 
-@media(max-width:768px){ .theater{flex-direction:column;gap:20px;} .seat{width:32px;height:32px;} .row-seats{gap:4px;} }
-@media(max-width:480px){ .seat{width:28px;height:28px;} .row-seats{gap:3px;} header h1{font-size:22px;} header h2{font-size:18px;} header p{font-size:12px;} }
+@media(max-width:768px){ .theater{flex-direction:column;gap:20px;} .seat{width:40px;height:40px;} .row-seats{gap:4px;} }
+@media(max-width:480px){ .seat{width:32px;height:32px;} .row-seats{gap:3px;} header h1{font-size:28px;} header h2{font-size:20px;} header p{font-size:12px;} }
 </style>
 </head>
 <body>
@@ -41,7 +48,7 @@ header p { margin:3px 0; font-size:14px;}
 <h2>Special Live Music Concert</h2>
 <p>Limited Slots for Free Registration</p>
 <p>Event Timing: February 28th, 2026, at 7:00 PM</p>
-<p>Event Address:<br>Potter's House, 3rd Floor, above Westside, Stadium Road,<br>Gachibowli, Hyderabad, Telangana 500032</p>
+<p>Event Address:<br>Potter's House, 3rd Floor, above Westside, Stadium Road,<br>Gachibowli, Telangana 500032</p>
 </header>
 
 <div id="popup">Limited Slots for Free Registration</div>
@@ -126,6 +133,7 @@ document.getElementById("bookBtn").addEventListener("click", async()=>{
 
     if(result.status==="success"){ modalMsg.style.color="green"; modalMsg.innerText="Booking successful!"; loadBookedSeats(); setTimeout(closeModal,1200);}
     else if(result.status==="taken"){ modalMsg.innerText="Seat already booked!"; loadBookedSeats();}
+    else if(result.status==="limit"){ modalMsg.innerText="Maximum 2 bookings per phone allowed.";}
     else if(result.status==="invalid"){ modalMsg.innerText="Missing data. Enter name & phone.";}
     else if(result.status==="unauthorized"){ modalMsg.innerText="Secret key invalid!";}
     else{ modalMsg.innerText="Unknown error!";}
