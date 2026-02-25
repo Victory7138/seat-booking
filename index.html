@@ -3,205 +3,273 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seat Booking</title>
+<title>Live Seat Booking</title>
 <style>
-/* General styling */
+/* ---------- BODY ---------- */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
+  background: linear-gradient(to bottom right,#e0f7fa,#ffe0b2);
   text-align: center;
-  background: #f0f2f5;
 }
 
-h2 {
-  margin: 20px 0;
+/* ---------- HEADER ---------- */
+header {
+  background: linear-gradient(to right, #4facfe, #00f2fe);
+  color: white;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* Theater seat grid */
+header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+header p {
+  margin: 5px 0 0 0;
+  font-size: 16px;
+}
+
+/* ---------- THEATER GRID ---------- */
 .theater {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-  gap: 10px;
-  max-width: 400px;
-  margin: 0 auto 20px auto;
+  grid-template-columns: repeat(21, 40px); /* 3 cols x 7 seats = 21 per row */
+  gap: 8px;
+  justify-content: center;
+  margin: 20px auto;
 }
 
 .seat {
-  background: #ccc;
-  padding: 15px 0;
-  border-radius: 5px;
+  width: 35px;
+  height: 35px;
+  border-radius: 6px;
+  background: #aed581; /* available color */
   cursor: pointer;
-  user-select: none;
-  font-weight: bold;
-  transition: background 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  position: relative;
+  transition: 0.2s;
 }
 
 .seat.selected {
-  background: #4CAF50;
+  background: #ff8a65; /* selected color */
   color: white;
 }
 
 .seat.booked {
-  background: #333;
+  background: #616161; /* booked color */
   color: white;
   cursor: not-allowed;
 }
 
-/* Form styling */
-form {
-  max-width: 400px;
-  margin: 0 auto 20px auto;
-  display: flex;
-  flex-direction: column;
+.seat::after {
+  content: "\1F4BA"; /* chair emoji */
+  position: absolute;
+  font-size: 18px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-input, button {
+/* ---------- FORM MODAL ---------- */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-top:0;
+}
+
+.modal-content input {
+  width: 90%;
   padding: 10px;
-  margin: 5px 0;
-  font-size: 16px;
+  margin: 8px 0;
+  font-size: 14px;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
 
-button {
-  background: #4CAF50;
+.modal-content button {
+  background: #4facfe;
   color: white;
-  cursor: pointer;
+  padding: 10px 20px;
   border: none;
+  border-radius:5px;
+  cursor: pointer;
   font-weight: bold;
+  margin-top: 10px;
 }
 
-button:hover {
-  background: #45a049;
+.modal-content button:hover{
+  background: #00f2fe;
 }
 
-/* Message */
 #msg {
   font-weight: bold;
   margin-top: 10px;
   color: #333;
 }
+
+@media(max-width:768px){
+  .theater{
+    grid-template-columns: repeat(14, 25px);
+  }
+  .seat::after{
+    font-size: 14px;
+  }
+}
 </style>
 </head>
 <body>
 
-<h2>Seat Booking System</h2>
+<header>
+  <h1>Music Concert</h1>
+  <p>Ideal square Building, Above Westside 3rd floor, Stadium Road, Gachibowli, 500032</p>
+</header>
 
 <div class="theater" id="seats"></div>
 
-<form id="bookingForm">
-  <input type="text" id="name" placeholder="Your Name" required>
-  <input type="text" id="phone" placeholder="Phone Number" required>
-  <button type="submit">Book Selected Seat</button>
-</form>
-
 <p id="msg"></p>
 
+<!-- MODAL FORM -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h3>Book Seat: <span id="selectedSeatLabel"></span></h3>
+    <input type="text" id="name" placeholder="Your Name" required>
+    <input type="text" id="phone" placeholder="Phone Number" required>
+    <button id="bookBtn">Book Now</button>
+    <p id="modalMsg" style="color:red;"></p>
+  </div>
+</div>
+
 <script>
-// ---------------------------
-// CONFIGURATION
-// ---------------------------
-const API_URL = "https://script.google.com/macros/s/AKfycbz81PoPoQ9xqjD-d3faIJR2PAUxzTJbdX7e06AEygWu0NKtPLCDFvrN-SvaMzr3DsCo/exec"; // Replace with your Google Apps Script Web App URL
-const SECRET = "Gp@804246&Victory"; // Secret key from Apps Script
+// ---------------------------- CONFIG
+const API_URL = "https://script.google.com/macros/s/AKfycbz81PoPoQ9xqjD-d3faIJR2PAUxzTJbdX7e06AEygWu0NKtPLCDFvrN-SvaMzr3DsCo/exec";
+const SECRET = "Gp@804246&Victory";
 
-// ---------------------------
-// CREATE SEATS
-// ---------------------------
 const seatsDiv = document.getElementById("seats");
-const rows = 5;
-const cols = 8;
 let selectedSeat = null;
+const totalRows = 20;
+const seatsPerRow = 21; // 3 columns × 7 seats per column
 
-for (let r = 1; r <= rows; r++) {
-  for (let c = 1; c <= cols; c++) {
+// ---------------------------- CREATE SEATS
+for(let r=1;r<=totalRows;r++){
+  for(let c=1;c<=seatsPerRow;c++){
     const seat = document.createElement("div");
-    const seatId = String.fromCharCode(64 + r) + c; // A1, A2...
-    seat.className = "seat";
-    seat.innerText = seatId;
-    seat.dataset.id = seatId;
-
-    seat.addEventListener("click", () => {
-      if (seat.classList.contains("booked")) return;
-
-      document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
-      seat.classList.add("selected");
+    const seatId = `R${r}S${c}`;
+    seat.className='seat';
+    seat.dataset.id=seatId;
+    seat.addEventListener("click",()=>{
+      if(seat.classList.contains("booked")) return;
       selectedSeat = seatId;
+      document.getElementById("selectedSeatLabel").innerText = seatId;
+      document.getElementById("modal").style.display = "flex";
     });
-
     seatsDiv.appendChild(seat);
   }
 }
 
-// ---------------------------
-// LOAD BOOKED SEATS
-// ---------------------------
-async function loadBookedSeats() {
-  try {
+// ---------------------------- LOAD BOOKED SEATS
+async function loadBookedSeats(){
+  try{
     const res = await fetch(API_URL);
     const data = await res.json();
-    data.booked.forEach(seatId => {
+    // clear previous booked
+    document.querySelectorAll(".seat").forEach(s=>s.classList.remove("booked"));
+    data.booked.forEach(seatId=>{
       const seat = document.querySelector(`[data-id="${seatId}"]`);
-      if (seat) seat.classList.add("booked");
+      if(seat) seat.classList.add("booked");
     });
-  } catch (err) {
-    console.error("Error loading booked seats:", err);
+  }catch(err){
+    console.error(err);
   }
 }
 
-// ---------------------------
-// BOOK SEAT FUNCTION
-// ---------------------------
-document.getElementById("bookingForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
+// ---------------------------- BOOK SEAT
+document.getElementById("bookBtn").addEventListener("click", async()=>{
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
+  const modalMsg = document.getElementById("modalMsg");
 
-  if (!selectedSeat) {
-    document.getElementById("msg").innerText = "Please select a seat.";
+  // validation
+  if(!name || !phone){
+    modalMsg.innerText = "Enter name & phone.";
     return;
   }
 
-  if (!name || !phone) {
-    document.getElementById("msg").innerText = "Please enter your name and phone.";
+  // simple phone validation
+  const phoneRegex = /^[0-9]{10}$/;
+  if(!phoneRegex.test(phone)){
+    modalMsg.innerText = "Enter valid 10-digit phone number.";
     return;
   }
 
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ secret: SECRET, seat: selectedSeat, name, phone })
+  try{
+    const res = await fetch(API_URL,{
+      method:"POST",
+      body: JSON.stringify({secret:SECRET, seat:selectedSeat, name, phone})
     });
-
     const result = await res.json();
 
-    if (result.status === "success") {
-      document.getElementById("msg").innerText = "Booking successful!";
-      loadBookedSeats(); // Refresh booked seats
-    } else if (result.status === "taken") {
-      document.getElementById("msg").innerText = "Seat already booked!";
+    if(result.status==="success"){
+      modalMsg.style.color="green";
+      modalMsg.innerText="Booking successful!";
       loadBookedSeats();
-    } else if (result.status === "unauthorized") {
-      document.getElementById("msg").innerText = "Unauthorized request!";
-    } else {
-      document.getElementById("msg").innerText = "Error occurred!";
+      setTimeout(()=>{closeModal();},1200);
+    }else if(result.status==="taken"){
+      modalMsg.innerText="Seat already booked!";
+      loadBookedSeats();
+    }else if(result.status==="limit"){
+      modalMsg.innerText="Max 2 seats per phone number allowed.";
+    }else{
+      modalMsg.innerText="Error occurred!";
     }
 
-    selectedSeat = null;
-    document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
-    document.getElementById("bookingForm").reset();
-
-  } catch (err) {
+  }catch(err){
     console.error(err);
-    document.getElementById("msg").innerText = "Network error!";
+    modalMsg.innerText="Network error!";
   }
 });
 
-// ---------------------------
-// INITIAL LOAD
-// ---------------------------
+function closeModal(){
+  document.getElementById("modal").style.display="none";
+  document.getElementById("name").value="";
+  document.getElementById("phone").value="";
+  document.getElementById("modalMsg").innerText="";
+  selectedSeat=null;
+}
+
+// click outside modal to close
+window.onclick = function(event) {
+  const modal = document.getElementById("modal");
+  if (event.target == modal) {
+    closeModal();
+  }
+}
+
+// Initial load & live refresh
 loadBookedSeats();
+setInterval(loadBookedSeats,10000);
+
 </script>
 
 </body>
